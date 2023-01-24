@@ -1,27 +1,65 @@
 import { Injectable } from '@angular/core';
 import { Person } from "@shared/interfaces";
+import { ToastrService } from "ngx-toastr";
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
-  savedValue: Person | null = null;
+  private savedSearchValue: Person | null = null;
+  private bookmarks: Person[] = [];
 
-  constructor() {
-    const savedValue = localStorage.getItem('savedValue')
+  constructor(
+    private toastrService: ToastrService
+  ) {
+    this.initSavedSearchValue();
+    this.initBookmarks();
+  }
 
-    if (typeof savedValue === 'string') {
-      this.savedValue = JSON.parse(savedValue);
+  saveSearchValue(value: Person) {
+    localStorage.setItem('savedSearchValue', JSON.stringify(value));
+
+    this.savedSearchValue = value;
+  }
+
+  getSavedSearchValue(): Person | null {
+    return this.savedSearchValue;
+  }
+
+  saveBookmark(value: Person) {
+    localStorage.setItem('bookmarks', JSON.stringify([...this.bookmarks, value]));
+
+    this.bookmarks?.push(value);
+
+    this.toastrService.success('Bookmark added');
+  }
+
+  removeBookmark(value: Person) {
+    const bookmarks = this.bookmarks.filter(bookmark => bookmark.name !== value.name)
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+    this.bookmarks = bookmarks;
+
+    this.toastrService.success('Bookmark removed');
+  }
+
+  getBookmarks(): Person[] {
+    return this.bookmarks;
+  }
+
+  private initSavedSearchValue() {
+    const savedSearchValue = localStorage.getItem('savedSearchValue')
+
+    if (typeof savedSearchValue === 'string') {
+      this.savedSearchValue = JSON.parse(savedSearchValue);
     }
   }
 
-  saveValue(value: Person) {
-    localStorage.setItem('savedValue', JSON.stringify(value));
+  private initBookmarks() {
+    const bookmarks = localStorage.getItem('bookmarks')
 
-    this.savedValue = value;
-  }
-
-  getSavedValue(): Person | null {
-    return this.savedValue;
+    if (typeof bookmarks === 'string') {
+      this.bookmarks = JSON.parse(bookmarks);
+    }
   }
 }

@@ -1,6 +1,11 @@
 .starships {
   padding: 25px;
   width: 1000px;
+
+  &__container {
+    display: flex;
+    justify-content: center;
+  }
 }
 
 .search {
@@ -12,4 +17,10 @@
 
 .table {
   width: 500px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
