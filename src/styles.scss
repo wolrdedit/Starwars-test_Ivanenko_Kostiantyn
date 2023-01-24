@@ -1,1 +1,20 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+$my-custom-level: mat.define-typography-level(
+  $font-family: Roboto,
+  $font-weight: 400,
+  $font-size: 1rem,
+  $line-height: 1,
+  $letter-spacing: normal,
+);
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: #313030;
+  color: #fff;
+}

@@ -1,0 +1,44 @@
+<div class="starships">
+  <form class="starships__search search">
+    <mat-form-field class="search__field" appearance="fill">
+      <mat-label>Names</mat-label>
+      <input type="text"
+             placeholder="Pick one"
+             aria-label="Names"
+             matInput
+             [formControl]="peopleControl"
+             [matAutocomplete]="auto">
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayName"
+                        (optionSelected)="getStarships($event.option.value)" autoSelectActiveOption="true">
+        <mat-option *ngFor="let person of filteredPeople$ | async; trackBy: trackByIdFn" [value]="person">
+          {{person.name}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </form>
+
+  <ng-container *ngIf="(starships$ | async) as starships">
+    <h2>Found Starships</h2>
+    <table mat-table [dataSource]="starships"
+           class="table mat-elevation-z8">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name</th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="model">
+        <th mat-header-cell *matHeaderCellDef> Model</th>
+        <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cost_in_credits">
+        <th mat-header-cell *matHeaderCellDef> Cost In Credits</th>
+        <td mat-cell *matCellDef="let element"> {{element.cost_in_credits}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </ng-container>
+
+</div>
