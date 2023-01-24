@@ -7,11 +7,22 @@ import { LoaderService } from "@core/services/loader.service";
 
 @Injectable()
 export class LoaderInterceptor implements HttpInterceptor {
+  requestsCounter: number = 0;
+
   constructor(private loaderService: LoaderService) {
   }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    this.requestsCounter++;
     this.loaderService.show();
-    return next.handle(request).pipe(finalize(() => this.loaderService.hide()));
+    return next.handle(request).pipe(finalize(() => {
+      this.requestsCounter--;
+
+      if (this.requestsCounter === 0) {
+        return this.loaderService.hide()
+      }
+
+      return this.loaderService.show();
+    }));
   }
 }

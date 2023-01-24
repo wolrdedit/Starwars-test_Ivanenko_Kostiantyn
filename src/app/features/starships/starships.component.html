@@ -18,8 +18,8 @@
   </form>
 
   <ng-container *ngIf="(starships$ | async) as starships">
-    <h2>Found Starships</h2>
-    <table mat-table [dataSource]="starships"
+    <h2 *ngIf="starships.length">Found Starships</h2>
+    <table *ngIf="starships.length" mat-table [dataSource]="starships"
            class="table mat-elevation-z8">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef> Name</th>

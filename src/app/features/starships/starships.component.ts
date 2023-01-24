@@ -1,21 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from "@angular/forms";
-import {
-  debounceTime,
-  from,
-  map,
-  mergeMap,
-  Observable,
-  of,
-  startWith,
-  Subject,
-  switchMap,
-  takeUntil,
-  tap,
-  toArray
-} from "rxjs";
+import { debounceTime, from, map, mergeMap, Observable, startWith, Subject, switchMap, takeUntil, toArray } from "rxjs";
 import { PeopleService } from "@core/services/people.service";
 import { Person, Starship } from "@shared/interfaces";
+import { StoreService } from "@core/services/store.service";
 
 @Component({
   selector: 'app-starships',
@@ -24,30 +12,32 @@ import { Person, Starship } from "@shared/interfaces";
 })
 export class StarshipsComponent implements OnInit, OnDestroy {
   readonly destroyer$ = new Subject<void>();
-  readonly peopleControl = new FormControl<string | Person>('');
+  readonly peopleControl = new FormControl<string | Person | null>(null);
   filteredPeople$!: Observable<Person[]>;
   starships$: Observable<Starship[] | null> = new Observable<Starship[] | null>();
 
   displayedColumns: string[] = ['name', 'model', 'cost_in_credits'];
 
   constructor(
-    private peopleService: PeopleService
+    private peopleService: PeopleService,
+    private storeService: StoreService,
   ) {
   }
 
   ngOnInit() {
+    this.getSavedData();
+
     this.filteredPeople$ = this.peopleControl.valueChanges
       .pipe(
         takeUntil(this.destroyer$),
         startWith(''),
-        tap(() => this.starships$ = of(null)),
-        debounceTime(1000),
+        debounceTime(500),
         switchMap((value) => {
           if (typeof value === 'string') {
             return this.getPeople(value || '')
           }
 
-          return of([]);
+          return this.filteredPeople$;
         }),
       );
   }
@@ -58,12 +48,15 @@ export class StarshipsComponent implements OnInit, OnDestroy {
   }
 
   getStarships(person: Person) {
+    this.saveSearchData(person);
+
     this.starships$ = from(person.starships)
       .pipe(
         mergeMap(url => {
+          console.log(url)
           return this.peopleService.getStarship(url)
         }),
-        toArray()
+        toArray(),
       )
   }
 
@@ -84,5 +77,18 @@ export class StarshipsComponent implements OnInit, OnDestroy {
             return people.results;
           }
         ));
+  }
+
+  private getSavedData() {
+    const savedData = this.storeService.getSavedValue();
+
+    if (savedData) {
+      this.peopleControl.setValue(savedData);
+      this.getStarships(savedData);
+    }
+  }
+
+  private saveSearchData(person: Person) {
+    this.storeService.saveValue(person);
   }
 }
